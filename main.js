@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   let authorizedSites = [];
 
-  // Initialization: sort the sites and create the default screen
+  // Initialization: sort sites and create default screen
   function initializeAuthorizedSites(sites) {
     authorizedSites = sites;
     authorizedSites.sort((a, b) => {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createScreens(1);
   }
 
-  // Create screens and dropdown menus
+  // Create screens and dropdown menus with unique IDs for anchors
   function createScreens(count) {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = '';
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     for (let i = 0; i < count; i++) {
       const screenDiv = document.createElement('div');
       screenDiv.className = 'screen';
+      screenDiv.id = 'screen-' + i; // unique anchor for scrolling
 
       // Create dropdown list
       const select = document.createElement('select');
@@ -49,18 +50,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Merge authorized sites from authorized-sites.json and the environment variable
+  // Merge authorized sites from JSON and the environment variable
   function mergeAuthorizedSites() {
     // If the environment variable is empty, set it to the default value.
     if (!window.authorizedSitesFromEnv || window.authorizedSitesFromEnv.trim() === "") {
       window.authorizedSitesFromEnv = "https://hongkoala.com/";
     }
   
-    // Fetch the content from authorized-sites.json
     return fetch('authorized-sites.json')
       .then(response => response.json())
       .then(jsonData => {
-        // Extract sites from the JSON data
         let jsonSites = [];
         if (jsonData && Array.isArray(jsonData.sites)) {
           jsonSites = jsonData.sites;
@@ -68,16 +67,14 @@ document.addEventListener('DOMContentLoaded', function() {
           console.error("authorized-sites.json does not contain a valid 'sites' array.");
         }
   
-        // Process the environment variable (now filled with default if it was empty)
         let envSites = window.authorizedSitesFromEnv
           .split(',')
           .map(site => site.trim())
           .filter(site => site !== '');
   
-        // Merge both arrays and remove duplicates
         const mergedSites = Array.from(new Set([...jsonSites, ...envSites]));
   
-        // Update IndexedDB with the merged list (optional)
+        // Optionally update IndexedDB with mergedSites
         db.setAuthorizedSites(mergedSites)
           .catch(err => console.error("Error saving merged sites to IndexedDB:", err));
   
@@ -85,7 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(err => {
         console.error("Error fetching authorized-sites.json:", err);
-        // If fetching JSON fails, fall back to processing the environment variable (already set to default if empty)
         let envSites = window.authorizedSitesFromEnv
           .split(',')
           .map(site => site.trim())
@@ -94,12 +90,18 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
   
-
-  // Merge sites and initialize authorized sites
   mergeAuthorizedSites().then(mergedSites => {
     initializeAuthorizedSites(mergedSites);
   });
-
+  
+  // Attach event listeners to sidebar buttons for changing screen count
+  document.querySelectorAll('.sidebar button').forEach(button => {
+    button.addEventListener('click', function() {
+      const numScreens = parseInt(this.getAttribute('data-screens'));
+      createScreens(numScreens);
+    });
+  });
+  
   // Clear Cache functionality
   const clearCacheButton = document.getElementById('clear-cache-btn');
   if (clearCacheButton) {
@@ -117,9 +119,48 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-});  // <-- This closes the DOMContentLoaded event listener
+  
+  // Attach navigation button event listeners for mobile scrolling.
+  // Here, we scroll the main container (#main-content) instead of the window.
+  const scrollUpBtn = document.getElementById('scroll-up');
+  const scrollDownBtn = document.getElementById('scroll-down');
+  if (scrollUpBtn && scrollDownBtn) {
+    scrollUpBtn.addEventListener('click', scrollToPreviousScreen);
+    scrollDownBtn.addEventListener('click', scrollToNextScreen);
+  }
+});
 
-// Register Service Worker (outside the DOMContentLoaded if preferred)
+// Scrolling functions: scroll the #main-content container by finding the next or previous screen
+function scrollToNextScreen() {
+  const mainContent = document.getElementById('main-content');
+  const screens = mainContent.querySelectorAll('.screen');
+  const currentScroll = mainContent.scrollTop;
+  for (let screen of screens) {
+    if (screen.offsetTop > currentScroll + 10) {
+      mainContent.scrollTo({ top: screen.offsetTop, behavior: 'smooth' });
+      break;
+    }
+  }
+}
+  
+function scrollToPreviousScreen() {
+  const mainContent = document.getElementById('main-content');
+  const screens = mainContent.querySelectorAll('.screen');
+  const currentScroll = mainContent.scrollTop;
+  let lastScreen = null;
+  for (let screen of screens) {
+    if (screen.offsetTop < currentScroll - 10) {
+      lastScreen = screen;
+    } else {
+      break;
+    }
+  }
+  if (lastScreen) {
+    mainContent.scrollTo({ top: lastScreen.offsetTop, behavior: 'smooth' });
+  }
+}
+  
+// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')

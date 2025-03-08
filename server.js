@@ -13,13 +13,13 @@ app.get('/', (req, res) => {
       console.error('Error reading index.html:', err);
       return res.status(500).send('Server Error');
     }
-    console.log("Raw HTML content:", data); // Debug: log raw file content
+
 
     const authorizedSites = (process.env.AUTHORIZED_SITES && process.env.AUTHORIZED_SITES.trim() !== "")
       ? process.env.AUTHORIZED_SITES
       : "https://xingzheng.kahiether.com/";
     const result = data.replace(/\$\{AUTHORIZED_SITES\}/g, authorizedSites);
-    console.log("Injected HTML:", result); // Debug: log result after replacement
+
     res.send(result);
   });
 });

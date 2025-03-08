@@ -6,7 +6,7 @@
   <title>MyPa - My Personal Assistant</title>
   <script src="styles.js"></script>
   <link rel="manifest" href="manifest.json" />
-  <!-- Injection placeholder -->
+  <!-- Injection placeholder: will be replaced by your server -->
   <script>
     window.authorizedSitesFromEnv = "${AUTHORIZED_SITES}";
   </script>
@@ -30,9 +30,12 @@
   <div class="main" id="main-content">
     <!-- Screens will be generated here -->
   </div>
-  <!-- Include db.js script -->
+  <!-- Include IndexedDB functions -->
   <script src="db.js"></script>
-  <!-- Main script -->
+  <!-- Main application script -->
   <script src="main.js"></script>
+  <!-- Navigation buttons for mobile scrolling -->
+  <button id="scroll-up" class="nav-button">↑</button>
+  <button id="scroll-down" class="nav-button">↓</button>
 </body>
 </html>

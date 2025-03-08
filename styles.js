@@ -85,7 +85,7 @@
       align-content: start;
     }
 
-    /* Screen Styling (applies to desktop) */
+    /* Screen Styling (Desktop) */
     .screen {
       display: flex;
       flex-direction: column;
@@ -212,6 +212,37 @@
         display: block;
         position: static;
         box-shadow: none;
+      }
+    }
+    
+    /* Navigation buttons for mobile scrolling */
+    .nav-button {
+      position: fixed;
+      right: 20px;
+      z-index: 2000;
+      background: #ef6300;
+      border: none;
+      color: #fff;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      border-radius: 50%;
+      opacity: 0.8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #scroll-up {
+      bottom: 80px;
+    }
+    #scroll-down {
+      bottom: 20px;
+    }
+    
+    @media only screen and (max-width: 768px) {
+      body {
+        overflow-y: auto;
       }
     }
   `;
