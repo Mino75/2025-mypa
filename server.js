@@ -1,42 +1,35 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const fs = require('fs');
+
+const PORT = process.env.PORT || 3000;
+
+// Serve index.html with injected environment variable
+app.get('/', (req, res) => {
+  const filePath = path.join(__dirname, 'index.html');
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading index.html:', err);
+      return res.status(500).send('Server Error');
+    }
+    console.log("Raw HTML content:", data); // Debug: log raw file content
+
+    const authorizedSites = (process.env.AUTHORIZED_SITES && process.env.AUTHORIZED_SITES.trim() !== "")
+      ? process.env.AUTHORIZED_SITES
+      : "https://xingzheng.kahiether.com/";
+    const result = data.replace(/\$\{AUTHORIZED_SITES\}/g, authorizedSites);
+    console.log("Injected HTML:", result); // Debug: log result after replacement
+    res.send(result);
+  });
+});
+
 
 // Serve static files from the current directory
 app.use(express.static(path.join(__dirname)));
 
-// Endpoint to serve configuration as a JavaScript file.
-app.get('/config.js', (req, res) => {
-  res.setHeader('Content-Type', 'application/javascript');
-  let sites = [];
-
-  if (process.env.AUTHORIZED_SITES_JSON) {
-    try {
-      // Expecting a JSON array or an object with a "sites" property.
-      const parsed = JSON.parse(process.env.AUTHORIZED_SITES_JSON);
-      sites = Array.isArray(parsed) ? parsed : parsed.sites || [];
-    } catch (e) {
-      console.error("Error parsing AUTHORIZED_SITES_JSON:", e);
-    }
-  }
-  
-  // If sites is empty, fallback to reading the local JSON file.
-  if (sites.length === 0) {
-    try {
-      const data = fs.readFileSync(path.join(__dirname, 'authorized-sites.json'), 'utf8');
-      const parsed = JSON.parse(data);
-      sites = parsed.sites || [];
-    } catch (e) {
-      console.error("Error reading authorized-sites.json:", e);
-    }
-  }
-
-  // Send out JavaScript that sets the global variable.
-  res.send(`window.AUTHORIZED_SITES = ${JSON.stringify(sites)};`);
-});
-
-
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
+
+

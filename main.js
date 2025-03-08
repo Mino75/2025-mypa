@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   let authorizedSites = [];
 
-  // Initialize authorized sites, sort them, then create default screen.
+  // Initialization: sort the sites and create the default screen
   function initializeAuthorizedSites(sites) {
     authorizedSites = sites;
     authorizedSites.sort((a, b) => {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createScreens(1);
   }
 
-  // Create the screens in the main container.
+  // Create screens and dropdown menus
   function createScreens(count) {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = '';
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const screenDiv = document.createElement('div');
       screenDiv.className = 'screen';
 
-      // Create the dropdown list.
+      // Create dropdown list
       const select = document.createElement('select');
       const defaultOption = document.createElement('option');
       defaultOption.text = 'Select a site';
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         select.appendChild(option);
       });
 
-      // Create the iframe that will load the selected site.
+      // Create iframe to load the selected site
       const iframe = document.createElement('iframe');
       select.addEventListener('change', function() {
         iframe.src = this.value;
@@ -49,38 +49,58 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Fetch the authorized sites from the static JSON file.
-  fetch('authorized-sites.json')
-    .then(response => response.json())
-    .then(data => {
-      if (Array.isArray(data.sites)) {
-        initializeAuthorizedSites(data.sites);
-      } else {
-        console.error('authorized-sites.json does not contain a valid "sites" array.');
-      }
-    })
-    .catch(err => console.error('Error loading authorized sites:', err));
+  // Merge authorized sites from authorized-sites.json and the environment variable
+  function mergeAuthorizedSites() {
+    // If the environment variable is empty, set it to the default value.
+    if (!window.authorizedSitesFromEnv || window.authorizedSitesFromEnv.trim() === "") {
+      window.authorizedSitesFromEnv = "https://hongkoala.com/";
+    }
+  
+    // Fetch the content from authorized-sites.json
+    return fetch('authorized-sites.json')
+      .then(response => response.json())
+      .then(jsonData => {
+        // Extract sites from the JSON data
+        let jsonSites = [];
+        if (jsonData && Array.isArray(jsonData.sites)) {
+          jsonSites = jsonData.sites;
+        } else {
+          console.error("authorized-sites.json does not contain a valid 'sites' array.");
+        }
+  
+        // Process the environment variable (now filled with default if it was empty)
+        let envSites = window.authorizedSitesFromEnv
+          .split(',')
+          .map(site => site.trim())
+          .filter(site => site !== '');
+  
+        // Merge both arrays and remove duplicates
+        const mergedSites = Array.from(new Set([...jsonSites, ...envSites]));
+  
+        // Update IndexedDB with the merged list (optional)
+        db.setAuthorizedSites(mergedSites)
+          .catch(err => console.error("Error saving merged sites to IndexedDB:", err));
+  
+        return mergedSites;
+      })
+      .catch(err => {
+        console.error("Error fetching authorized-sites.json:", err);
+        // If fetching JSON fails, fall back to processing the environment variable (already set to default if empty)
+        let envSites = window.authorizedSitesFromEnv
+          .split(',')
+          .map(site => site.trim())
+          .filter(site => site !== '');
+        return envSites;
+      });
+  }
+  
 
-  // Listen for clicks on the sidebar buttons to change the layout.
-  document.querySelectorAll('.sidebar button').forEach(button => {
-    button.addEventListener('click', function() {
-      const numScreens = parseInt(this.getAttribute('data-screens'));
-      createScreens(numScreens);
-    });
+  // Merge sites and initialize authorized sites
+  mergeAuthorizedSites().then(mergedSites => {
+    initializeAuthorizedSites(mergedSites);
   });
-});
 
-// Service Worker registration.
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => console.log('Service Worker registered with scope:', registration.scope))
-      .catch(error => console.error('Service Worker registration failed:', error));
-  });
-}
-
-// Clear cache functionality.
-document.addEventListener('DOMContentLoaded', function() {
+  // Clear Cache functionality
   const clearCacheButton = document.getElementById('clear-cache-btn');
   if (clearCacheButton) {
     clearCacheButton.addEventListener('click', function() {
@@ -97,4 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-});
+});  // <-- This closes the DOMContentLoaded event listener
+
+// Register Service Worker (outside the DOMContentLoaded if preferred)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => console.log('Service Worker registered with scope:', registration.scope))
+      .catch(error => console.error('Service Worker registration failed:', error));
+  });
+}

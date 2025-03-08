@@ -13,8 +13,6 @@ RUN npm install --omit=dev
 # Copy the rest of the application files
 COPY . .
 
-# Run the merge script during build
-RUN node merge-sites.js
 
 # Expose the port that the app runs on
 EXPOSE 3000
