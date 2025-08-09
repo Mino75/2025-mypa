@@ -34,7 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
       authorizedSites.forEach(url => {
         const option = document.createElement('option');
         option.value = url;
-        option.text = url.replace(/^https:\/\//, '').split('.')[0];
+        switch (true) {
+          case cleanUrl.includes('.github.io/'):
+          option.text = url.split('/').pop().replace(/\/$/, '') || url.split('/')[url.split('/').length - 2];
+          break;
+    
+          default:
+          option.text = cleanUrl.split('.')[0];
+          break;
+        }
         select.appendChild(option);
       });
 
