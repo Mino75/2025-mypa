@@ -1,4 +1,13 @@
+
+
 (function() {
+
+// Define preset background colors and pick one randomly
+const backgroundOptions = ['#FF8F00', '#D32F2F', '#388E3C', '#1976D2', '#7B1FA2'];
+const selectedBackground = backgroundOptions[Math.floor(Math.random() * backgroundOptions.length)];
+
+  
+  
   var css = `
     body {
       margin: 0;
