@@ -13,7 +13,7 @@ const selectedBackground = backgroundOptions[Math.floor(Math.random() * backgrou
       margin: 0;
       font-family: Arial, sans-serif;
       overflow: hidden;
-      background-color: #121212;
+      background-color: ${selectedBackground};
       color: #fff;
     }
 
@@ -24,7 +24,7 @@ const selectedBackground = backgroundOptions[Math.floor(Math.random() * backgrou
       top: 0;
       width: 220px;
       bottom: 0;
-      background: #1e1e1e;
+      background: ${selectedBackground};
       padding: 10px;
       box-sizing: border-box;
       color: #fff;
