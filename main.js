@@ -1,15 +1,15 @@
 // main.js — MyPa (simple + verbose)
-// - Layout restricted to 1/2/3/4/20 (100/1000 removed)
+// - Layout restricted to 1/2/3/4/20
 // - Uses authorized-sites.json + AUTHORIZED_SITES env merge
 // - UI: screens with dropdown -> iframe src, cache clear, scroll nav
 // - Function-calling bridge: mypa_list_actions / mypa_call
-// - PostMessage endpoint: MYPA_CALL / MYPA_RESPONSE (no origin allowlist; CSP frame-ancestors is assumed)
+// - PostMessage endpoint: MYPA_CALL / MYPA_RESPONSE 
 // - Child messaging:
 //    a) generic iframe.postMessage (send any payload to child)
 //    b) iframe.kizuna.call + iframe.kizuna.listActions (for Kizuna-like children using KIZUNA_CALL/KIZUNA_RESPONSE)
 //
 // Important note on Kizuna calls:
-// - Yes: the Kizuna postMessage protocol is "variable enough" to call ANY tool name.
+// - the Kizuna postMessage protocol is "variable enough" to call ANY tool name.
 // - Requirement: the child must expose those tools in its Kizuna TOOLS (including meta.listActions).
 // - If Kizuna is injected inline in a child site, and that child exposes extra tools, mypa can call them the same way.
 
