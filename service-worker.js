@@ -1,5 +1,9 @@
-const LIVE_CACHE = 'character-trainer-v1';
-const TEMP_CACHE = 'character-trainer-temp-v1';
+// service-worker.js
+
+// Generate a cache
+
+const LIVE_CACHE = 'mypa-v1';
+const TEMP_CACHE = 'mypa-temp-v1';
 const ASSETS = [
   '/',
   '/index.html',
@@ -13,6 +17,25 @@ const ASSETS = [
   '/icon-192x192.png',
   '/icon-512x512.png'
 ];
+
+// Install: Download all assets into a temporary cache.
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(TEMP_CACHE).then(tempCache => {
+      // Fetch and cache every asset.
+      return Promise.all(
+        ASSETS.map(url => {
+          return fetch(url).then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to fetch ${url}`);
+            }
+            return tempCache.put(url, response.clone());
+          });
+        })
+      );
+    })
+  );
+});
 
 // Install: Download all assets into a temporary cache.
 self.addEventListener('install', event => {
