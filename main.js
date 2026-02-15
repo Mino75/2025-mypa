@@ -567,7 +567,6 @@
       scrollDownBtn.addEventListener("click", scrollToNextScreen);
     }
 
-    // Service worker
-    registerServiceWorker();
+
   });
 })();
