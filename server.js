@@ -106,7 +106,7 @@ if ('serviceWorker' in navigator) {
 `;
     
     // Prepend rescue code to your existing main.js
-    const finalContent = rescueCode + '\n\n' + jsContent;
+    const finalContent = envInjection + '\n' + rescueCode + '\n\n' + jsContent;
     
     res.setHeader('Content-Type', 'application/javascript');
     res.setHeader('Cache-Control', 'no-cache');
