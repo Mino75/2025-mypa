@@ -70,6 +70,12 @@ app.get('/main.js', (req, res) => {
   try {
     // Read the actual main.js file (your existing game/app code)
     let jsContent = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+
+
+    const envInjection = `
+/* Env injected by server */
+window.authorizedSitesFromEnv = ${JSON.stringify(process.env.AUTHORIZED_SITES || "")};
+`;
     
     // Inject ONLY the rescue detection code at the beginning
     const rescueCode = `
