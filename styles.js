@@ -243,10 +243,10 @@ const selectedBackground = backgroundOptions[Math.floor(Math.random() * backgrou
       justify-content: center;
     }
     #scroll-up {
-      bottom: 80px;
+      bottom: 120px;
     }
     #scroll-down {
-      bottom: 20px;
+      bottom: 60px;
     }
     
     @media only screen and (max-width: 768px) {
